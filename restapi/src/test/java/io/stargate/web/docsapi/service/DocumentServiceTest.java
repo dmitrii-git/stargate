@@ -166,7 +166,9 @@ public class DocumentServiceTest {
             List.class,
             List.class,
             Boolean.class,
-            String.class);
+            String.class,
+            int.class,
+            ByteBuffer.class);
     searchRows.setAccessible(true);
   }
 
@@ -1220,7 +1222,14 @@ public class DocumentServiceTest {
     DocumentService serviceMock = PowerMockito.mock(DocumentService.class);
     PowerMockito.when(
             serviceMock.searchDocumentsV2(
-                anyObject(), anyString(), anyString(), anyList(), anyList(), anyString()))
+                anyObject(),
+                anyString(),
+                anyString(),
+                anyList(),
+                anyList(),
+                anyString(),
+                anyInt(),
+                anyObject()))
         .thenCallRealMethod();
     PowerMockito.when(
             serviceMock,
@@ -1232,7 +1241,9 @@ public class DocumentServiceTest {
             anyList(),
             anyList(),
             anyBoolean(),
-            anyString())
+            anyString(),
+            anyInt(),
+            anyObject())
         .thenReturn(ImmutablePair.of(new ArrayList<>(), null));
 
     List<FilterCondition> filters =
@@ -1240,7 +1251,7 @@ public class DocumentServiceTest {
             new SingleFilterCondition(ImmutableList.of("a", "b", "c"), "$eq", "value"));
     ImmutablePair<JsonNode, ByteBuffer> result =
         serviceMock.searchDocumentsV2(
-            dbMock, "keyspace", "collection", filters, new ArrayList<>(), null);
+            dbMock, "keyspace", "collection", filters, new ArrayList<>(), null, 100, null);
     assertThat(result).isNull();
   }
 
@@ -1250,7 +1261,14 @@ public class DocumentServiceTest {
     DocumentService serviceMock = PowerMockito.mock(DocumentService.class);
     PowerMockito.when(
             serviceMock.searchDocumentsV2(
-                anyObject(), anyString(), anyString(), anyList(), anyList(), anyString()))
+                anyObject(),
+                anyString(),
+                anyString(),
+                anyList(),
+                anyList(),
+                anyString(),
+                anyInt(),
+                anyObject()))
         .thenCallRealMethod();
     PowerMockito.when(
             serviceMock,
@@ -1272,7 +1290,7 @@ public class DocumentServiceTest {
             new SingleFilterCondition(ImmutableList.of("a", "b", "c"), "$eq", "value"));
     ImmutablePair<JsonNode, ByteBuffer> result =
         serviceMock.searchDocumentsV2(
-            dbMock, "keyspace", "collection", filters, new ArrayList<>(), null);
+            dbMock, "keyspace", "collection", filters, new ArrayList<>(), null, 100, null);
     assertThat(result.right).isNull();
     assertThat(result.left).isEqualTo(mapper.readTree("{\"1\":[{\"a\":1},{\"a\":1},{\"a\":1}]}"));
   }
@@ -1283,7 +1301,14 @@ public class DocumentServiceTest {
     DocumentService serviceMock = PowerMockito.mock(DocumentService.class);
     PowerMockito.when(
             serviceMock.searchDocumentsV2(
-                anyObject(), anyString(), anyString(), anyList(), anyList(), anyString()))
+                anyObject(),
+                anyString(),
+                anyString(),
+                anyList(),
+                anyList(),
+                anyString(),
+                anyInt(),
+                anyObject()))
         .thenCallRealMethod();
     PowerMockito.when(
             serviceMock,
@@ -1305,7 +1330,7 @@ public class DocumentServiceTest {
             new SingleFilterCondition(ImmutableList.of("a", "b", "c"), "$exists", true));
     ImmutablePair<JsonNode, ByteBuffer> result =
         serviceMock.searchDocumentsV2(
-            dbMock, "keyspace", "collection", filters, ImmutableList.of("field"), null);
+            dbMock, "keyspace", "collection", filters, ImmutableList.of("field"), null, 100, null);
     assertThat(result.right).isNull();
     assertThat(result.left).isEqualTo(mapper.readTree("{\"1\":[{\"a\":1},{\"a\":1},{\"a\":1}]}"));
   }
@@ -1334,8 +1359,7 @@ public class DocumentServiceTest {
     Db dbFactoryMock = PowerMockito.mock(Db.class);
     DocumentDB dbMock = PowerMockito.mock(DocumentDB.class);
     DocumentService serviceMock = PowerMockito.mock(DocumentService.class);
-    PowerMockito.when(dbFactoryMock.getDocDataStoreForToken(anyString(), anyInt(), anyObject()))
-        .thenReturn(dbMock);
+    PowerMockito.when(dbFactoryMock.getDocDataStoreForToken(anyString())).thenReturn(dbMock);
     PowerMockito.when(
             serviceMock,
             "searchRows",
@@ -1386,8 +1410,7 @@ public class DocumentServiceTest {
     DocumentService serviceMock = PowerMockito.mock(DocumentService.class);
     List<Row> twoDocsRows = makeInitialRowData();
     twoDocsRows.addAll(makeRowDataForSecondDoc());
-    PowerMockito.when(dbFactoryMock.getDocDataStoreForToken(anyString(), anyInt(), anyObject()))
-        .thenReturn(dbMock);
+    PowerMockito.when(dbFactoryMock.getDocDataStoreForToken(anyString())).thenReturn(dbMock);
     PowerMockito.when(
             serviceMock,
             "searchRows",
@@ -1460,7 +1483,9 @@ public class DocumentServiceTest {
                 filters,
                 new ArrayList<>(),
                 ImmutableList.of("a,b", "*", "c"),
+                false,
                 null,
+                100,
                 null);
 
     assertThat(result.right).isNull();
